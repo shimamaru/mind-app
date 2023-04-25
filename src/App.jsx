@@ -1,46 +1,42 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { Tree } from "react-d3-tree";
+import treeData from "./../src/treeDate";
 
-const App = () => {
-  const [loading, setLoading] = useState(true);
-  const [widgets, setWidgets] = useState([]);
+const containerStyles = {
+  width: "100%",
+  height: "100vh",
+};
 
-  const fetchMiroData = async () => {
-    setLoading(true);
+const customNodeStyles = {
+  circle: {
+    fill: "#6ec9a9",
+  },
+  text: {
+    fill: "#333",
+  },
+};
 
-    const apiKey = process.env.REACT_APP_MIRO_API_KEY;
-    const boardId = "your_board_id"; // MiroボードのIDを設定します
-    const url = `https://api.miro.com/v1/boards/${boardId}/widgets`;
+function App() {
+  const [translate, setTranslate] = useState({ x: 0, y: 0 });
 
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    const data = await response.json();
-    setWidgets(data.data);
-    setLoading(false);
+  const onTreeLoad = (treeContainer) => {
+    const dimensions = treeContainer.getBoundingClientRect();
+    setTranslate({ x: dimensions.width / 2, y: dimensions.height / 2 });
   };
 
-  useEffect(() => {
-    fetchMiroData();
-  }, []);
-
   return (
-    <div>
-      <h1>Miro Widgets</h1>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <ul>
-          {widgets.map((widget) => (
-            <li key={widget.id}>{widget.type}</li>
-          ))}
-        </ul>
-      )}
+    <div style={containerStyles}>
+      <Tree
+        data={treeData}
+        orientation="horizontal"
+        translate={translate}
+        onTreeLoad={onTreeLoad}
+        nodeSvgShape={{ shape: "circle", shapeProps: { r: 10 } }}
+        textLayout={{ textAnchor: "start", x: 15, y: -7 }}
+        styles={{ nodes: customNodeStyles }}
+      />
     </div>
   );
-};
+}
 
 export default App;
